@@ -36,5 +36,7 @@
 
 ## 構成
 test_phalandra/
+
 ├─ frontend/  # Vue 3 + Vite フロントエンド
+
 └─ backend/   # Node/Express バックエンド

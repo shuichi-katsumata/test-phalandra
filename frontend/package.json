@@ -1,0 +1,23 @@
+{
+  "name": "phalandra",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@vuepic/vue-datepicker": "^7.4.0",
+    "dayjs": "^1.11.11",
+    "firebase": "^11.1.0",
+    "jodit-vue3": "^1.0.5",
+    "pinia": "^2.3.0",
+    "vue": "^3.0.4",
+    "vue-router": "^4.3.2",
+    "vuedraggable": "^4.1.0",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vue/compiler-sfc": "^3.0.4",
+    "vite": "^1.0.0-rc.13"
+  }
+}

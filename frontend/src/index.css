@@ -1,0 +1,169 @@
+/* スクロールバー全体の幅を調整 */
+::-webkit-scrollbar {
+  width: 8px;  /* 横スクロール用 */
+  height: 8px; /* 縦スクロール用 */
+}
+
+/* スクロールバーのつまみ部分 */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);  /* スクロールバーの色を薄い黒に */
+  border-radius: 4px;  /* 角を丸くする */
+}
+
+/* スクロールバーの上下矢印（デフォルトのスクロールボタン）を消す */
+::-webkit-scrollbar-button {
+  display: none;
+}
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
+}
+
+body {
+  background-color: #f8f9fa;
+}
+
+table {
+  table-layout: fixed;
+}
+
+.sidebar {
+  width: 13%;
+}
+
+.menu-btn .btn-outline {
+  border-left: 4px solid transparent;
+}
+
+.menu-btn.router-link-active .btn-outline {
+  background-color: #f0f0f0;
+  border-left: 4px solid #007bff; 
+}
+
+.btn-outline:hover {
+  background-color: rgba(0, 123, 255, 0.4);
+}
+
+.main_board {
+  width: 85%;
+}
+
+.table_title {
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+th {
+  padding: 1rem 0;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+}
+
+td {
+  background-color: #fff;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+}
+
+ul {
+  padding:1rem 0;
+}
+
+.question_margin {
+  margin-right: 2em;
+}
+
+.cautionary_note {
+  font-size: 0.75em;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.delete-mark {
+  top:-15px;
+  right: -4px;
+  cursor: pointer;
+}
+
+.uploadImg_width {
+  width: 20%;
+}
+
+.select_file {
+  padding: 2px 7px;
+  color: black;
+  background-color: #efefef;
+  border: 0.7px solid #7c7d7e;
+  border-radius: 2px;
+}
+
+.select_file:hover {
+  background-color: #E5E5E5;
+  border-color: #2c3e50;
+}
+
+.selling_point {
+  margin-right: 1.5em;
+  width: 13%;
+  font-size: 13px;
+}
+
+.pl_selling_point{
+  margin-right: 0.5em;
+  width: 18%;
+}
+
+.selected_point {
+  width: 150px;
+  margin: 0.3em;
+  padding: 0.2em 0;
+  text-align: center;
+  background-color: #0d6efd;
+  border-radius: 5px;
+  color: #fff;
+}
+
+.select_order {
+  width: 20%;
+}
+
+.select_order_title {
+  width: 80%;
+}
+
+.tag_title {
+  background: #FFF0F8;
+}
+
+.custom-button {
+  background: none;
+  border: none;
+  padding: 6px 0;
+}
+
+.schedule_input:focus {
+  outline: none;
+}
+
+.fading {
+  animation: fadeOutIn 1.5s ease-in-out infinite;
+}
+.button-disabled{
+  pointer-events: none;
+  cursor: not-allowed;
+  background-color: #9FA5AA;
+  border-color: #9FA5AA;
+}
+
+@keyframes fadeOutIn {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

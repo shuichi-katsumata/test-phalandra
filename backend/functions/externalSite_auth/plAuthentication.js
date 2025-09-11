@@ -7,7 +7,10 @@ const writePlAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type( 'input[name="id"]', id);
     await page.type('input[name="password"]', pass);
-    await page.click('#form_submit > input[type="image"]');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle0' }),
+      page.click('#form_submit > input[type="image"]')
+    ]);
     const errorMessage = await page.$('#login_contBox > div > font');
 
     if (errorMessage) {

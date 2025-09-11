@@ -7,7 +7,10 @@ const writeKjAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type( '#email', id);
     await page.type('#password', pass);
-    await page.click('input[name="login"]');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle0' }),
+      page.click('input[name="login"]')
+    ]);
     const errorMessage = await page.$('#page_main > div > form > div > div > div.dialog_error');
 
     if (errorMessage) {

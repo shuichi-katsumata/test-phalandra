@@ -4,6 +4,7 @@ const setTimeout = require('node:timers/promises').setTimeout;
 const writeToOg_addGirl = require('../addCastData/og_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const editCastToOg = async(accountKey, data, panelRef, logId, page) => {
 
@@ -60,11 +61,15 @@ const editCastToOg = async(accountKey, data, panelRef, logId, page) => {
     });
 
     //  編集内容登録
-    await page.focus('input[name="castEntryDate"]');
-    await page.keyboard.down('Control');
-    await page.keyboard.press('KeyA');
-    await page.keyboard.up('Control');
-    await page.type('input[name="castEntryDate"]', data.entryDate);
+    if (data.entryDate) {
+      await page.focus('input[name="castEntryDate"]');
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyA');
+      await page.keyboard.up('Control');
+      await page.type('input[name="castEntryDate"]', data.entryDate);
+
+    }
+
     await page.type('input[name="castName"]', data.castName);
     await page.type('input[name="castAge"]', data.age);
     await page.type('input[name="castBodyT"]', data.height);
@@ -154,7 +159,7 @@ const editCastToOg = async(accountKey, data, panelRef, logId, page) => {
 
           for (let i = 0; i < panelLength; i++) {
             const fileInputElement = '#f > div:nth-child(2) > div:nth-child(2) > input[type="file"]';
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
 
             if (i === 0) {
 

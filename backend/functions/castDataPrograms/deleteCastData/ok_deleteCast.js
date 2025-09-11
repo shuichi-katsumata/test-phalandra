@@ -1,4 +1,5 @@
 const getLoginInfo = require('../../setting/externalSiteInfo');
+const setTimeout = require('node:timers/promises').setTimeout;
 const { db } = require('../../../utils/firebaseUtils');
 
 const deleteCastToOk = async(accountKey, data, logId, page) => {
@@ -8,10 +9,18 @@ const deleteCastToOk = async(accountKey, data, logId, page) => {
   try {
 
     await page.goto(loginUrl);
+    await page.waitForSelector('input[name="id"]');
     await page.type('input[name="id"]', id);
     await page.type('input[name="password"]', pass);
+    await setTimeout(2000);
     await page.click('input[name="login_req"]');
-    await page.click('#container > div.menu > ul > li:nth-child(5) > a');
+    await setTimeout(2000);
+    
+    await Promise.all([
+      page.waitForNavigation({waitUntil: 'load'}),
+      page.click('#container > div.menu > ul > li:nth-child(5) > a')
+    ]);
+    
 
     const isFound = await page.evaluate((castName)=> {
 
@@ -50,7 +59,7 @@ const deleteCastToOk = async(accountKey, data, logId, page) => {
     });
 
   } catch (error) {
-
+    console.error(error.message);
     await content_logs.push({
       ok: '雄琴協会サイト：エラー！'
     });

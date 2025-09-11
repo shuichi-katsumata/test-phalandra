@@ -10,7 +10,10 @@ const yg_addressGetter = require('./diaryAddressGetter/yg_addressGetter');
 const diaryAddressGetter = async(accountKey, castName) => {
 
   // const browser = await puppeteer.launch({ headless: false });
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
 
   const page = await browser.newPage();
   let ec, pl, fj, kj, kf, og, yg;

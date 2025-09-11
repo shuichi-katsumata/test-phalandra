@@ -23,8 +23,11 @@ const deleteCastDataPrograms = async(db, accountKey, removedCastRef) => {
     latestKey = childSnapshot.key;
   });
 
-  const browser = await puppeteer.launch({ headless: false });
-  // const browser = await puppeteer.launch({ headless: "new" });
+  // const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
 
   page.on('dialog', async(dialog) => {
@@ -41,7 +44,7 @@ const deleteCastDataPrograms = async(db, accountKey, removedCastRef) => {
     deleteCastToKf,
     deleteCastToOk,
     deleteCastToOg,
-    deleteCastToYg
+    deleteCastToYg,
   ];
   
   try {

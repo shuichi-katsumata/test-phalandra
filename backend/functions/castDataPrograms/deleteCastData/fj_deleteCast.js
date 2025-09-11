@@ -70,7 +70,7 @@ const deleteCastToFj = async(accountKey, data, logId, page) => {
     });
     
   } catch (error) {
-
+    console.error(error.message);
     await content_logs.push({
       fj: '風俗じゃぱん：エラー！'
     });

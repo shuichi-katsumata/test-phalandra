@@ -4,12 +4,12 @@ const article_extraction = require('../../setting/article_extraction');
 const setTimeout = require('node:timers/promises').setTimeout;
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const writeToCh_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
   const content_logs = db.ref(`users/${accountKey}/logs/girls_log/${latestKey}/content_logs`);
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ch');
-  const [ year, month, day ] = data.entryDate.split('-');
 
   try {
 
@@ -18,7 +18,7 @@ const writeToCh_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     await page.keyboard.press('Tab');
     await page.keyboard.type(pass);
     await Promise.all([
-      page.waitForNavigation({waitUntil:'load'}),
+      page.waitForNavigation({ waitUntil:'load', timeout: 60000 }),
       page.click('body > div > form.oldLogin > table > tbody > tr:nth-child(2) > td > button'),
 
     ]);
@@ -26,13 +26,13 @@ const writeToCh_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     const castListPageLink = await page.$x("//a[normalize-space(text())='キャスト情報']");
     //  女の子情報タブをクリック
     await Promise.all([
-      page.waitForNavigation({ waitUntil: 'load' }),
+      page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
       castListPageLink[0].click(),
     
     ]);
 
     await Promise.all([
-      page.waitForNavigation({waitUntil:'load'}),
+      page.waitForNavigation({ waitUntil:'load', timeout: 60000 }),
       page.click('a.info2'),
     
     ]);
@@ -44,6 +44,7 @@ const writeToCh_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     }
 
     if (data.entryDate) {
+      const [ year, month, day ] = data.entryDate.split('-');
       await page.select('#sel_workyear', year);
       await page.select('#sel_workmonth', month);
       await page.select('#sel_workday', day);
@@ -65,7 +66,7 @@ const writeToCh_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
           for (let i = 0; i < panelLength; i++) {
             const fileInputName = `girls_photo${i}`;
             const file_input = await page.$(`input[name="${fileInputName}"]`); // ページ上で指定された名前属性を持つファイル入力要素を取得
-            const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             await file_input.uploadFile(file_path); // uploadFileを使うのでclickはいらない
             await page.waitForNavigation(); // 各画像のアップロードに時間がかかるので、完了するまで待って繰り返す
 
@@ -121,7 +122,7 @@ const writeToCh_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     const submitBtn = await page.$('input[name="insert"]');
     await submitBtn.evaluate(el => el.scrollIntoView());
     await Promise.all([
-      page.waitForNavigation({waitUntil: 'load'}),
+      page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
       submitBtn.click(),
     
     ]);

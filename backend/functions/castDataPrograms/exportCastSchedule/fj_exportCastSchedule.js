@@ -3,6 +3,8 @@ const setTimeout = require('node:timers/promises').setTimeout;
 
 const exportCastScheduleToFj = async(db, accountKey, logIdAndCastName, dateList, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'fj');
+  const globalLogId = Object.keys(logIdAndCastName)[0];
+  const globalContentLogs = db.ref(`users/${accountKey}/logs/schedule_log/${globalLogId}/content_logs`);
   
   try {
 
@@ -141,6 +143,9 @@ const exportCastScheduleToFj = async(db, accountKey, logIdAndCastName, dateList,
     }
   } catch (error) {
     console.error(error.message);
+    await globalContentLogs.push({
+      fj: '風俗じゃぱん：エラー！'
+    });
     
   }
 }

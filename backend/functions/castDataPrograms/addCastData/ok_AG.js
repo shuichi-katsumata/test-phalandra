@@ -3,6 +3,7 @@ const article_extraction = require('../../setting/article_extraction');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const setTimeout = require('node:timers/promises').setTimeout;
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const writeToOk_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
@@ -12,6 +13,7 @@ const writeToOk_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
   try {
 
     await page.goto(loginUrl);
+    await page.waitForSelector('input[name="id"]');
     await page.type('input[name="id"]', id);
     await page.type('input[name="password"]', pass);
     await setTimeout(2000);
@@ -60,7 +62,7 @@ const writeToOk_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
           for (let i=0; i<panelLength; i++) {
             const fileInputName = `image${i+1}`;
             const file_input = await page.$(`input[name=${fileInputName}]`); // fileの選択
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             await file_input.uploadFile(file_path);
 
           }

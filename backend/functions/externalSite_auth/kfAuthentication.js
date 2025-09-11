@@ -7,7 +7,10 @@ const writeKfAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type('#login_id', id);
     await page.type('#login_password', pass);
-    await page.click('#ShopShopShopsLoginForm > div.adminLogin > div > input');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'load' }),
+      page.click('#ShopShopShopsLoginForm > div.adminLogin > div > input')
+    ]);
     const errorMessage = await page.$('#ShopShopShopsLoginForm > div.adminLogin > div.mtp__errorfield');
 
     if (errorMessage) {

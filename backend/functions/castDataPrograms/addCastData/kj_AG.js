@@ -3,6 +3,7 @@ const article_extraction = require('../../setting/article_extraction');
 const setTimeout = require('node:timers/promises').setTimeout;
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const writeToKj_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
@@ -33,14 +34,14 @@ const writeToKj_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     //  女の子登録
     await page.type('#girl_name', data.castName);
     
-    function EntryDateOld(entryDate) {  // 入店日が3ヶ月以上前か調べる
+    const EntryDateOld = (entryDate) => {  // 入店日が3ヶ月以上前か調べる
       const date = new Date();
       date.setMonth(date.getMonth() - 3);
       return new Date(entryDate) < date;
     
     }
 
-    if (!EntryDateOld(data.entryDate)) {
+    if (data.entryDate && !EntryDateOld(data.entryDate)) {
       await page.select('#girl_join_date', data.entryDate);
     
     }
@@ -69,7 +70,7 @@ const writeToKj_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
             for (let i = 0; i < panelLength; i++) {
               const fileInputName = i === 0 ? 'girl_filename': `girl_filename${i + 1}`;
               const file_input = await page.$(`input[name=${fileInputName}]`); // fileの選択
-              const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+              const file_path = path.join(tempFolderPath, panelData[i + 1]);
               await file_input.uploadFile(file_path);
     
             }

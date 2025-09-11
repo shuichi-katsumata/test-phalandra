@@ -5,12 +5,12 @@ const setTimeout = require('node:timers/promises').setTimeout;
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
 const checkAndResizeImage = require('../../setting/resizeImagesProgram');
+const path = require('path');
 
 const writeToPl_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
   const content_logs = db.ref(`users/${accountKey}/logs/girls_log/${latestKey}/content_logs`);
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'pl');
-  const [year, month, day] = data.entryDate.split('-');
 
   try {
 
@@ -35,6 +35,7 @@ const writeToPl_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     await setTimeout(500);
 
     if (data.entryDate) {
+      const [year, month, day] = data.entryDate.split('-');
       await page.select('#year', year);
       await page.evaluate((selectMonth, selectDay)=> {
 
@@ -141,7 +142,7 @@ const writeToPl_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
             const panelLength = Math.min(Object.keys(panelData).length, 5);
             for (let i = 0; i < panelLength; i++) {
               const file_input = await page.$('input[name="upload_file[]"]');
-              const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+              const file_path = path.join(tempFolderPath, panelData[i + 1]);
               //  ファイルサイズをチェックして必要ならリサイズ
               const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);
               //  アップロード処理

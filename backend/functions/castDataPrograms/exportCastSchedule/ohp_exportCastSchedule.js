@@ -4,6 +4,8 @@ const { formatTime } = require('../../../utils/timeUtils');
 
 const exportCastScheduleToOhp = async(db, accountKey, logIdAndCastName, dateList, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ohp');
+  const globalLogId = Object.keys(logIdAndCastName)[0];
+  const globalContentLogs = db.ref(`users/${accountKey}/logs/schedule_log/${globalLogId}/content_logs`);
   
   try {
 
@@ -22,11 +24,9 @@ const exportCastScheduleToOhp = async(db, accountKey, logIdAndCastName, dateList
     ]);
       
     for (const [id, castName] of Object.entries(logIdAndCastName)) {
-
+      //  ログ用
+      const content_logs = db.ref(`users/${accountKey}/logs/schedule_log/${id}/content_logs`);
       try {
-
-        //  ログ用
-        const content_logs = db.ref(`users/${accountKey}/logs/schedule_log/${id}/content_logs`);
 
         //  女の子検索
         const castSearch = await page.evaluate((castName) => {
@@ -87,7 +87,7 @@ const exportCastScheduleToOhp = async(db, accountKey, logIdAndCastName, dateList
           const popover = await page.waitForSelector('.popover.fade.top.in, .popover.show', {timeout: 3000});
           const startTimeElement = await popover.$('select:nth-child(1)');
           const endTimeElement = await popover.$('select:nth-child(2)');
-          const scheduleType = await popover.$('select[name="schedule_type"]');
+          const scheduleType = await popover.$('div:nth-child(5) > select');
           const saveScheduleBtn = await popover.$('button.saveSchedule');
           const deleteScheduleBtn = await popover.$('button.deleteSchedule.schedule');  //  削除ボタン3つあるから気を付けるように
 
@@ -124,8 +124,13 @@ const exportCastScheduleToOhp = async(db, accountKey, logIdAndCastName, dateList
             if (scheduleType) {
               await scheduleType.evaluate(el => el.scrollIntoView());
               await scheduleType.evaluate((el) => el.value = '1');
-            
-            }
+              if (saveScheduleBtn) {
+                await saveScheduleBtn.evaluate(el => el.scrollIntoView());
+                await setTimeout(1500); //  間を空けないとOHPのスクリプトが処理しきれない
+                await saveScheduleBtn.click();
+              
+              }
+            }                
           } else {
 
             if (deleteScheduleBtn) {
@@ -169,6 +174,9 @@ const exportCastScheduleToOhp = async(db, accountKey, logIdAndCastName, dateList
     }
   } catch (error) {
     console.error(error.message);
+    await globalContentLogs.push({
+      ohp: 'オフィシャル：エラー！'
+    });
     
   }
 }

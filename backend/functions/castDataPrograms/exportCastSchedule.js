@@ -10,12 +10,16 @@ const exportCastScheduleToOk = require('./exportCastSchedule/ok_exportCastSchedu
 const exportCastScheduleToOg = require('./exportCastSchedule/og_exportCastSchedule.js');
 const exportCastScheduleToYg = require('./exportCastSchedule/yg_exportCastSchedule.js');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
 
 const exportCastSchedule = async(db, accountKey, selectedCast) => {
-
   const today = new Date();
   const dbRef = db.ref('/');
   const updates = {};
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  const jpTime = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
 
   //  スケジュールログ登録
   const logIdAndCastName = {};
@@ -25,7 +29,7 @@ const exportCastSchedule = async(db, accountKey, selectedCast) => {
     Object.assign(updates, {
       [`users/${accountKey}/logs/schedule_log/${id}`]: {
         content: `キャストスケジュール登録：${castName}`,
-        registration_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        registration_date: jpTime,
       },
     });
 
@@ -34,8 +38,11 @@ const exportCastSchedule = async(db, accountKey, selectedCast) => {
 
   await dbRef.update(updates);
 
-  const browser = await puppeteer.launch({ headless: false });
-  // const browser = await puppeteer.launch({ headless: "new" });
+  // const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
 
   page.on('dialog', async(dialog) => {
@@ -43,16 +50,16 @@ const exportCastSchedule = async(db, accountKey, selectedCast) => {
   });
 
   const exportCastScheduleFunctions = [
-    // exportCastScheduleToOhp,
-    // exportCastScheduleToCh,
-    // exportCastScheduleToEc,
-    // exportCastScheduleToPl,
-    // exportCastScheduleToFj,
-    // exportCastScheduleToKj,
+    exportCastScheduleToOhp,
+    exportCastScheduleToCh,
+    exportCastScheduleToEc,
+    exportCastScheduleToPl,
+    exportCastScheduleToFj,
+    exportCastScheduleToKj,
     exportCastScheduleToKf,
-    // exportCastScheduleToOk,
-    // exportCastScheduleToOg,
-    // exportCastScheduleToYg
+    exportCastScheduleToOk,
+    exportCastScheduleToOg,
+    exportCastScheduleToYg,
   ];
 
   try {

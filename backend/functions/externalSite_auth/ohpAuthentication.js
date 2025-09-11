@@ -7,7 +7,10 @@ const writeOhpAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type('input[name=id]', id);
     await page.type('input[name=password]', pass);
-    await page.click('input[type=submit]');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'load' }),
+      page.click('input[type=submit]')
+    ]);
     const errorMessage = await page.$('#gateway_in > p');
 
     if (errorMessage) {

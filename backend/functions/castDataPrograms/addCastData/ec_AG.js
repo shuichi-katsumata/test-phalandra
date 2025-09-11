@@ -72,8 +72,7 @@ const writeToEc_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
       }
 
       await page.click('#form_update-btn');
-
-      await page.waitForSelector('a.boxer.modal-open[data-target="con1"]');
+      await setTimeout(3000);
 
       // パネル登録
       await new Promise((resolve, reject)=> {
@@ -85,7 +84,7 @@ const writeToEc_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
               await page.click(`a.boxer.modal-open[data-target="con${i + 1}"]`);
               await setTimeout(5000);
               const file_input = await page.$(`#con${i + 1} input[name=upfile]`);
-              const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+              const file_path = path.join(tempFolderPath, panelData[i + 1]);
 
               //  ファイルサイズをチェックして必要ならリサイズ
               const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);

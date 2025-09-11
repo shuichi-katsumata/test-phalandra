@@ -7,7 +7,10 @@ const writeYgAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type('input[name="username"]', id);
     await page.type('input[name="password"]', pass);
-    await page.click('input[type="submit"]');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'load' }),
+      page.click('input[type="submit"]')
+    ]);
     const errorMessage = await page.$('body > main > div > div.box_msg.error');
 
     if (errorMessage) {

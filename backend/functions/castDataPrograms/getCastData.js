@@ -1,10 +1,14 @@
 const puppeteer = require('puppeteer');
 const getLoginInfo = require('../setting/externalSiteInfo');
 const { bucket } = require('../../utils/firebaseUtils');
+const path = require('path');
 const importCastDataToFirebase = require('../castDataPrograms/importCastDataToFirebase');
 
 const getCastData = async(accountKey, selectedCast) => {
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ch');
 
@@ -15,14 +19,14 @@ const getCastData = async(accountKey, selectedCast) => {
     await page.keyboard.press('Tab');
     await page.keyboard.type(pass);
     await Promise.all([
-      page.waitForNavigation({ waitUntil: 'load' }),
+      page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
       page.click('body > div > form.oldLogin > table > tbody > tr:nth-child(2) > td > button'),
     ]);
 
     const castListPageLink = await page.$x("//a[normalize-space(text())='キャスト情報']");
     //  女の子情報タブをクリック
     await Promise.all([
-      page.waitForNavigation({ waitUntil: 'load' }),
+      page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
       castListPageLink[0].click(),
     
     ]);
@@ -44,7 +48,7 @@ const getCastData = async(accountKey, selectedCast) => {
           });
         }, selectedCast[index]);
 
-        await page.waitForNavigation({waitUntil: 'load'});
+        await page.waitForNavigation({waitUntil: 'load', timeout: 60000});
       
       } catch(error) {
         continue;
@@ -131,24 +135,44 @@ const getCastData = async(accountKey, selectedCast) => {
         });
       });  
 
-      //  画像登録
+      //  画像登録処理
       const firstUrl = imgUrls[0];
       const urlSegments = firstUrl.split('/');
       const filelNameSegment = urlSegments[urlSegments.length - 1];  //  画像urlの最後の部分を取得
       const prefix = filelNameSegment.substring(0, 4);  //  先頭4文字を取得
+
+      //  対象キャストの画像フォルダがあれば削除
+      const castDirectoryPath = `users/${accountKey}/add_girl/${selectedCast[index]}`
+      async function deleteFilesInDirectory(path) {
+        // ディレクトリ内の全ファイルとサブディレクトリも含めて取得
+        const [files] = await bucket.getFiles({ prefix: path });
+
+        if (files.length === 0) return;
+
+        // すべて削除
+        const deletePromises = files.map(file => file.delete());
+        await Promise.all(deletePromises);
+
+      }
+
+      if (castDirectoryPath) {
+        await deleteFilesInDirectory(castDirectoryPath);
+
+      }
       
       if (prefix !== 'grpb') {  //  ヘブンのnoPHOTOのパネルがあてられてる時は画像urlの最後の部分の先頭がgrpbになっているので比較している（指定したパネルの場合はla_grpbになっている）
         for (let i = 0; i < imgUrls.length; i++) {
-          const fileName = `${selectedCast[index]}_${i + 1}`;
+          let timestamp = Date.now();
+          let fileName = `${selectedCast[index]}_${i + 1}_${timestamp}`;  //  タイムスタンプを入れてDBのpanelURLsに変更を入れる
+          if (!path.extname(fileName)) {
+            fileName += '.jpg';
+          }
           panels.push(fileName);
           const uploadedUrl = await uploadImage(imgUrls[i], `users/${accountKey}/add_girl/${selectedCast[index]}/${i + 1}/${fileName}`);
           panelURLs.push(uploadedUrl);
           await new Promise(res => setTimeout(res, 1000)); //  storageに画像を同時に登録するタイミングを無くす
 
         }
-      } else {
-        panelURLs.push(noImgUrl);
-      
       }
 
       //  年齢
@@ -206,7 +230,7 @@ const getCastData = async(accountKey, selectedCast) => {
       
       const castListPageLink2 = await page.$x("//a[normalize-space(text())='キャスト情報']");
       await Promise.all([
-        page.waitForNavigation({ waitUntil: 'load' }),
+        page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
         castListPageLink2[0].click(),
       ]);
 

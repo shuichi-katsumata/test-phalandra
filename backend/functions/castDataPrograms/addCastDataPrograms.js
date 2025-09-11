@@ -27,26 +27,29 @@ const addCastDataPrograms = async(db, accountKey, castName) => {
     latestKey = childSnapshot.key;
   });
 
-  const browser = await puppeteer.launch({ headless: false });
-  // const browser = await puppeteer.launch({ headless: "new" });
+  // const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
 
   page.on('dialog', async(dialog) => {
     await dialog.accept();
   });
 
-  await downloadImageFromFirebaseStorage(accountKey, storageFilePath, castData);  
+  await downloadImageFromFirebaseStorage(storageFilePath);  
 
   const addFunctions = [
-    // writeToOhp_addGirl,
-    // writeToCh_addGirl,
-    // writeToEc_addGirl,
-    // writeToPl_addGirl,
-    // writeToFj_addGirl,
-    // writeToKj_addGirl,
-    // writeToKf_addGirl,
-    // writeToOk_addGirl,
-    // writeToOg_addGirl,
+    writeToOhp_addGirl,
+    writeToCh_addGirl,
+    writeToEc_addGirl,
+    writeToPl_addGirl,
+    writeToFj_addGirl,
+    writeToKj_addGirl,
+    writeToKf_addGirl,
+    writeToOk_addGirl,
+    writeToOg_addGirl,
     writeToYg_addGirl,
   ];
   

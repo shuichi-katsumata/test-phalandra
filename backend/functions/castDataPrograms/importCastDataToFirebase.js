@@ -1,11 +1,17 @@
 const { db } = require('../../utils/firebaseUtils');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
 
 const importCastDataToFirebase = async(accountKey, castData) => {
   let d = new Date();
   let id = d.getTime();
   let panelUpdates = {};
   let panelURLsUpdates = {};
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  const jpTime = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
+
   //  realtimedatabseの書き込む場所の設定
   const dbRef = db.ref('/');
   const ordersRef = db.ref(`users/${accountKey}/add_girl/orders`);
@@ -38,6 +44,7 @@ const importCastDataToFirebase = async(accountKey, castData) => {
   } else {
     const noImgUrl = 'https://firebasestorage.googleapis.com/v0/b/phalandra-256-da694.appspot.com/o/noPhoto_panel%2Fno_photo.jpg?alt=media&token=3ac5cfde-1cea-413a-ad86-a915e27838d4';
     panelURLsUpdates[1] = noImgUrl;
+    updates[`users/${accountKey}/add_girl/cast_data/${castData.castName}/profile/panel`] = null;
     updates[`users/${accountKey}/add_girl/cast_data/${castData.castName}/profile/panelURLs`] = panelURLsUpdates;
   }
 
@@ -51,7 +58,7 @@ const importCastDataToFirebase = async(accountKey, castData) => {
   Object.assign(updates, {
     [`users/${accountKey}/logs/girls_log/${id}`]: {
       content: `キャストデータ取り込み：${castData.castName}`,
-      registration_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      registration_date: jpTime,
     },
     [`${castProfilePath}/situation`]: 'public',
     [`${castProfilePath}/castName`]: castData.castName,
@@ -87,7 +94,7 @@ const importCastDataToFirebase = async(accountKey, castData) => {
     await dbRef.update({
       [`users/${accountKey}/logs/girls_log/${id}`]: {
         content: `キャストデータ取り込み：${castData.castName}`,
-        registration_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        registration_date: jpTime,
 
       }
     });

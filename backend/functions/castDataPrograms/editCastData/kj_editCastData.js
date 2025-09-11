@@ -4,6 +4,7 @@ const setTimeout = require('node:timers/promises').setTimeout;
 const writeToKj_addGirl = require('../addCastData/kj_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const editCastToKj = async(accountKey, data, panelRef, logId, page) => {
   
@@ -99,7 +100,7 @@ const editCastToKj = async(accountKey, data, panelRef, logId, page) => {
           for (let i = 0; i < panelLength; i++) {
               const fileInputName = i === 0 ? 'girl_filename': `girl_filename${i + 1}`;
               const file_input = await page.$(`input[name=${fileInputName}]`); // fileの選択
-              const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+              const file_path = path.join(tempFolderPath, panelData[i + 1]);
               await file_input.uploadFile(file_path);
           }
 

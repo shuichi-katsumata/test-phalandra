@@ -6,6 +6,7 @@ const writeToKf_addGirl = require('../addCastData/kf_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
 const checkAndResizeImage = require('../../setting/resizeImagesProgram');
+const path = require('path');
 
 const editCastToKf = async(accountKey, data, panelRef, logId, page) => {
 
@@ -56,8 +57,12 @@ const editCastToKf = async(accountKey, data, panelRef, logId, page) => {
       }, data.castName);
     } catch (error) {
       //  一度ログアウトして追加処理
-      await page.click('#bodyHeader__id > div.right_container > div.bodyHeader__userAccount > div > span')
-      await page.click('#account > a');
+      await page.click('#bodyHeader__id > div.right_container > div.bodyHeader__userAccount > div > span');
+      const accountLink = await page.waitForSelector('#account > a', { visible: true });
+      await accountLink.evaluate(el => el.scrollIntoView());
+      await accountLink.click();
+      await setTimeout(3000);
+
       await writeToKf_addGirl(accountKey, data, panelRef, logId, page);
       return;
 
@@ -169,7 +174,7 @@ const editCastToKf = async(accountKey, data, panelRef, logId, page) => {
             const fileInputId = `#fileUpload__id_${i+1} input[type="file"]`;
             await page.waitForSelector(fileInputId);
             const file_input = await page.$(fileInputId); // fileの選択
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             //  ファイルサイズをチェックして必要ならリサイズ
             const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);
             //  アップロード処理
@@ -178,25 +183,20 @@ const editCastToKf = async(accountKey, data, panelRef, logId, page) => {
           }
 
           for (let i = panelLength; i < 5; i++) {
-          
             await page.evaluate((i) => {
               const imgDeleteBtns = document.querySelectorAll('#GirlImageDelete.icon-checkbox');
-          
               if (imgDeleteBtns[i]) {
                 imgDeleteBtns[i].checked = true;
+
               }
-          
             }, i);
-          
           }
 
           await setTimeout(5000);
           await page.click('.modalSubmit.flat[data-submit="girlImageForm"]');
         
         } else {
-          
           await page.waitForSelector('#girl_photo_list');
-          
           await page.evaluate(() => {
             const imgDeleteBtns = document.querySelectorAll('#GirlImageDelete.icon-checkbox');
           
@@ -204,9 +204,9 @@ const editCastToKf = async(accountKey, data, panelRef, logId, page) => {
               imgDeleteBtns.forEach((btn) => {
                 console.log(btn);
                 btn.checked = true;
+             
               });
             }
-          
           });
           
           await setTimeout(5000);
@@ -218,18 +218,19 @@ const editCastToKf = async(accountKey, data, panelRef, logId, page) => {
     });
     
     await page.waitForSelector('li.displaySwitchItem');
+    await setTimeout(3000);
     
     await content_logs.push({
       kf: '京風：編集完了'
+    
     });
   
   } catch (error) {
-  
     console.error(error.message);
     await content_logs.push({
       kf: '京風：エラー！'
+    
     });
-  
   }
 }
 

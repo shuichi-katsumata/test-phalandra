@@ -1,8 +1,10 @@
 const getLoginInfo = require('../../setting/externalSiteInfo');
-const setTimeout = require('node:timers/promises').setTimeout;
 
 const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ch');
+  const globalLogId = Object.keys(logIdAndCastName)[0];
+  const globalContentLogs = db.ref(`users/${accountKey}/logs/schedule_log/${globalLogId}/content_logs`);
+
   
   try {
 
@@ -24,7 +26,7 @@ const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList,
       castListPageLink[0].click(),
     
     ]);
-    
+
     for (const [id, castName] of Object.entries(logIdAndCastName)) {
 
       //  ログ用
@@ -36,11 +38,11 @@ const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList,
         const castSearch = await page.evaluate((castName) => {
           let castSearch = false;
           const listItems = document.querySelectorAll('#list > li');
-
           listItems.forEach((item) => {
             const nameElement =item.querySelector('div.galListData > h5');
             if (nameElement.textContent.trim() === castName) {
               const scheduleBtn = item.querySelector('div.galDataForm > input[type=button]:nth-child(2)');
+              
               scheduleBtn.click();
               castSearch = true;
             
@@ -66,7 +68,7 @@ const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList,
           page.click('#shukkinShiftTable > tbody > tr.time > td.girl-thum > a'),
         
         ]);
-        console.log(dateList);
+
         //  出勤登録
         for (let i = 0; i < dateList.length; i++) {
           const dateStr = dateList[i];
@@ -101,7 +103,7 @@ const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList,
           } else {
             if (nextMonthLink) {
               await Promise.all([
-                page.waitForNavigation({waitUntil:'load'}),
+                page.waitForNavigation({waitUntil:'load', timeout: 60000}),
                 nextMonthLink.click()
 
               ]);
@@ -170,12 +172,11 @@ const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList,
           }
           
           if (saveScheduleBtn) {
-            // await setTimeout(2000);
             await saveScheduleBtn.click();
           
           }
         }
-        
+
         const castListPageLink2 = await page.$x("//a[normalize-space(text())='キャスト情報']");
         //  女の子情報タブをクリック
         await Promise.all([
@@ -207,6 +208,9 @@ const exportCastScheduleToCh = async(db, accountKey, logIdAndCastName, dateList,
     }
   } catch (error) {
     console.error(error.message);
+    await globalContentLogs.push({
+      ch: 'シティヘブン：エラー！'
+    });
     
   }
 }

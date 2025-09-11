@@ -46,20 +46,21 @@ app.post('/importCastData', async(req, res) => {
   const { accountKey, selectedCast } = req.body;  //  フロントエンドから送信されたデータを取得
   const siteButtonStateRef = db.ref(`users/${accountKey}/site_button_state`);  
   await siteButtonStateRef.update({ importingCast: true });
+  res.status(200).json({ message: 'Cast data import started' });
 
-  try {
-    await getCastData(accountKey, selectedCast);
-    // 成功レスポンスを返す
-    res.status(200).json({ message: 'Data received successfully', data: selectedCast });
-  
-  } catch (error) {
-    console.error('Error importing cast data:', error);
-    res.status(500).json({ message: 'Error importing data', error: error.message });
-  
-  } finally {
-    await siteButtonStateRef.update({ importingCast: false });
+  // ジョブを非同期で実行
+  setImmediate(async() => {
+    try {
+      await getCastData(accountKey, selectedCast);
 
-  }
+    } catch (error) {
+      console.error('Error importCastData:', error);
+
+    } finally {
+      await siteButtonStateRef.update({ importingCast: false });
+    
+    }
+  });
 });
 
 //  女の子データの追加
@@ -69,19 +70,21 @@ app.post('/add-castData', async(req, res) => {
   const siteButtonStateRef = db.ref(`users/${accountKey}/site_button_state/`);  
   await button_stateRef.update({ isAdding: true });
   await siteButtonStateRef.update({ disabledSortingCast: true });
-  
-  try {
-    await addCastDataPrograms(db, accountKey, castName);
-    res.status(200).json({ message: 'Data added successfully', castName });
-  
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to add cast data', error: error.message });
-  
-  } finally {
-    await button_stateRef.update({ isAdding: false });
-    await siteButtonStateRef.update({ disabledSortingCast: false });
+  res.status(200).json({ message: 'Add started', castName });
 
-  }
+  setImmediate(async() => {
+    try {
+      await addCastDataPrograms(db, accountKey, castName);
+    
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to add cast data', error: error.message });
+    
+    } finally {
+      await button_stateRef.update({ isAdding: false });
+      await siteButtonStateRef.update({ disabledSortingCast: false });
+
+    }
+  });
 });
 
 //  女の子データの編集
@@ -89,38 +92,42 @@ app.post('/edit-castData', async(req, res) => {
   const { accountKey, castName } = req.body;  //  クライアント側からcastNameを受け取る
   const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
   await button_stateRef.update({ isEditing: true });
+  res.status(200).json({ message: 'Edit started', castName });
 
-  try {
-    await editCastDataPrograms(db, accountKey, castName);
-    res.status(200).json({ message: 'Data edited successfully', castName });
-  
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to edit cast data', error: error.message });
+  setImmediate(async() => {
+    try {
+      await editCastDataPrograms(db, accountKey, castName);
+    
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to edit cast data', error: error.message });
 
-  } finally {
-    await button_stateRef.update({ isEditing: false });
+    } finally {
+      await button_stateRef.update({ isEditing: false });
 
-  }
+    }
+  });
 });
 
 //  女の子データの並び替え
-app.post('/api/sort-castData', async(req, res) => {
+app.post('/sort-castData', async(req, res) => {
   const { accountKey } = req.body;
   const siteButtonStateRef = db.ref(`users/${accountKey}/site_button_state/`);  
   await siteButtonStateRef.update({ sortingCast: true });
+  res.status(200).json({ message: 'Sort started' });
 
-  try {
-    await sortCastDataPrograms(db, accountKey);
-    res.status(200).json({ message: 'sortCastData is successfully'});
-  
-  } catch(error) {
-    console.error('Error sortCastData:', error);
-    res.status(500).json({ message: 'Error sorting data', error: error.message });
-
-  } finally {
-    await siteButtonStateRef.update({ sortingCast: false });
+  setImmediate(async() => {
+    try {
+      await sortCastDataPrograms(db, accountKey);
     
-  }
+    } catch(error) {
+      console.error('Error sortCastData:', error);
+      res.status(500).json({ message: 'Error sorting data', error: error.message });
+
+    } finally {
+      await siteButtonStateRef.update({ sortingCast: false });
+      
+    }
+  });
 });
 
 //  女の子データの削除
@@ -129,18 +136,20 @@ app.post('/delete-castData', async(req, res) => {
   const removedCastRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}`);
   const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
   await button_stateRef.update({ isDeleting: true });
+  res.status(200).json({ message: 'Delete started'});
 
-  try {
-    await deleteCastDataPrograms(db, accountKey, removedCastRef);
-    res.status(200).json({ message: 'Data deleted successfully'});
+  setImmediate(async() =>{
+    try {
+      await deleteCastDataPrograms(db, accountKey, removedCastRef);
 
-  } catch (error) {
-    res.status(200).json({ message: 'Failed to delete cast data', castName });
-  
-  } finally {
-    await removedCastRef.remove();  //  DBから消すのでsiteButtonStateRefとかの制御はいらない
+    } catch (error) {
+      res.status(200).json({ message: 'Failed to delete cast data', castName });
+    
+    } finally {
+      await removedCastRef.remove();  //  DBから消すのでsiteButtonStateRefとかの制御はいらない
 
-  }
+    }
+  });
 });
 
 //  外部サイトのID・PASS登録
@@ -186,48 +195,52 @@ app.post('/write_diaryAddress', async(req, res) => {
   const { accountKey, castName, diaryAddress } = req.body;
   const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
   await button_stateRef.update({ registering_diaryAddress: true });
+  res.status(200).json({ message: 'writing address started'});
 
-  try {
-    await writeToCh_castPage(accountKey, castName, diaryAddress);
-    res.status(200).json({ message: 'writing was successful'});
+  setImmediate(async() => {
+    try {
+      await writeToCh_castPage(accountKey, castName, diaryAddress);
 
-  } catch (error) {
-    res.status(200).end();
-  
-  } finally {
-    await button_stateRef.update({ registering_diaryAddress: false });
+    } catch (error) {
+      res.status(200).end();
+    
+    } finally {
+      await button_stateRef.update({ registering_diaryAddress: false });
 
-  }
+    }
+  });
 });
 
 //  出勤情報取り込み
 app.post('/importCastSchedule', async(req, res) => {
   const { accountKey, selectedCast } = req.body;
+  const siteButtonStateRef = db.ref(`users/${accountKey}/site_button_state/`);
+  await siteButtonStateRef.update({ importingCastSchedule: true });
   for (const castName of selectedCast) {
     const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
     await button_stateRef.update({ isImportingThisCastSchedule: true});
 
   }
-  const siteButtonStateRef = db.ref(`users/${accountKey}/site_button_state/`);
-  await siteButtonStateRef.update({ importingCastSchedule: true });
+  res.status(200).json({ message: 'Schedule data import started'});
 
-  try {
-    await getCastSchedule(accountKey, selectedCast);
-    res.status(200).json({ message: 'Schedule data received successfully'});
+  setImmediate(async() => {
+    try {
+      await getCastSchedule(accountKey, selectedCast);
 
-  } catch (error) {
-    console.error('Error importing cast schedule data:', error);
-    res.status(500).json({ message: 'Error importing cast schedule data', error: error.message });
+    } catch (error) {
+      console.error('Error importing cast schedule data:', error);
+      res.status(500).json({ message: 'Error importing cast schedule data', error: error.message });
 
-  } finally {
-    for (const castName of selectedCast) {
-      const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
-      await button_stateRef.update({ isImportingThisCastSchedule: false });
+    } finally {
+      for (const castName of selectedCast) {
+        const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
+        await button_stateRef.update({ isImportingThisCastSchedule: false });
 
-    };
-    await siteButtonStateRef.update({ importingCastSchedule: false });
+      };
+      await siteButtonStateRef.update({ importingCastSchedule: false });
 
-  }
+    }
+  });
 });
 
 //  出勤情報外部サイト反映
@@ -240,22 +253,24 @@ app.post('/exportCastSchedule', async(req, res) => {
   }
   const siteButtonStateRef = db.ref(`users/${accountKey}/site_button_state/`);
   await siteButtonStateRef.update({ exportingCastSchedule: true });
+  res.status(200).json({ message: 'Schedule data export started'});
 
-  try {
-    await exportCastSchedule(db, accountKey, selectedCast);
-    res.status(200).json({ message: 'Schedule data received successfully'});
+  setImmediate(async() => {
+    try {
+      await exportCastSchedule(db, accountKey, selectedCast);
 
-  } catch (error) {
-    console.error('Error exporting cast data:', error);
-    res.status(500).json({ message: 'Error exporting cast schedule data', error: error.message });
+    } catch (error) {
+      console.error('Error exporting cast data:', error);
+      res.status(500).json({ message: 'Error exporting cast schedule data', error: error.message });
 
-  } finally {
-    for (const castName of selectedCast) {
-      const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
-      await button_stateRef.update({ isExportingThisCastSchedule: false });
+    } finally {
+      for (const castName of selectedCast) {
+        const button_stateRef = db.ref(`users/${accountKey}/add_girl/cast_data/${castName}/button_state`);
+        await button_stateRef.update({ isExportingThisCastSchedule: false });
 
-    };
-    await siteButtonStateRef.update({ exportingCastSchedule: false });
+      };
+      await siteButtonStateRef.update({ exportingCastSchedule: false });
 
-  }
+    }
+  });
 });

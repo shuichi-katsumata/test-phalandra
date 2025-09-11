@@ -68,7 +68,7 @@ const deleteCastToKf = async(accountKey, data, logId, page) => {
     });
     
   } catch (error) {
-
+    console.error(error.message);
     await content_logs.push({
       kf: '京風：エラー！'
     });

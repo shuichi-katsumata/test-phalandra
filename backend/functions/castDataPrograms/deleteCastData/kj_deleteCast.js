@@ -122,7 +122,6 @@ const deleteCastToKj = async(accountKey, data, logId, page) => {
     });
 
   } catch (error) {
-
     console.error(error.message);
     await content_logs.push({
       kj: '口コミ風俗情報局：エラー！'

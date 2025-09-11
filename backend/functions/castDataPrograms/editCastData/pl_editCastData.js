@@ -6,12 +6,12 @@ const writeToPl_addGirl = require('../addCastData/pl_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
 const checkAndResizeImage = require('../../setting/resizeImagesProgram');
+const path = require('path');
 
 const editCastToPl = async(accountKey, data, panelRef, logId, page) => {
 
   const content_logs = db.ref(`users/${accountKey}/logs/girls_log/${logId}/content_logs`);
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'pl');
-  const [year, month, day] = data.entryDate.split('-');
 
   try {
 
@@ -73,18 +73,23 @@ const editCastToPl = async(accountKey, data, panelRef, logId, page) => {
     await setTimeout(500);
     await page.type('#word', data.catchCopy);
     await setTimeout(500);
+
     if (data.entryDate) {
+      const [year, month, day] = data.entryDate.split('-');
       await page.select('#year', year);
       await setTimeout(500);
       await page.evaluate((selectMonth, selectDay)=> {
         // 整数を作る
         function integer(days) {
           return parseInt(days, 10).toString();
+        
         }
         document.querySelector('#month').options[integer(selectMonth)].selected = true;
         document.querySelector('#day').options[integer(selectDay)].selected = true;
+      
       }, month, day);
     }
+    
     const ageElement = await page.$('#form1 > div > table > tbody > tr:nth-child(6)');
     await ageElement.evaluate(el => el.scrollIntoView({ block: 'center' }));
     await page.type('input[name="age"]', data.age);
@@ -262,8 +267,7 @@ const editCastToPl = async(accountKey, data, panelRef, logId, page) => {
             //  登録
             for (let i = 0; i < panelLength; i++) {
               const file_input = await page.$('input[name="upload_file[]"]');
-              // await file_input.evaluate(el => el.scrollIntoView({ block: 'center' }));
-              const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+              const file_path = path.join(tempFolderPath, panelData[i + 1]);
               //  ファイルサイズをチェックして必要ならリサイズ
               const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);
               //  アップロード処理

@@ -2,7 +2,9 @@ const { tempFolderPath } = require('../../setting/downloadImageFromFirebaseStora
 const article_extraction = require('../../setting/article_extraction');
 const writeToOk_addGirl = require('../addCastData/ok_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
+const setTimeout = require('node:timers/promises').setTimeout;
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const editCastToOk = async(accountKey, data, panelRef, logId, page) => {
   
@@ -12,9 +14,13 @@ const editCastToOk = async(accountKey, data, panelRef, logId, page) => {
   try {
 
     await page.goto(loginUrl);
+    await page.waitForSelector('input[name="id"]');
     await page.type('input[name="id"]', id);
     await page.type('input[name="password"]', pass);
+    await setTimeout(2000);
     await page.click('input[name="login_req"]');
+    await setTimeout(2000);
+
     await Promise.all([
       page.waitForNavigation({waitUntil: 'load'}),
       page.click('#container > div.menu > ul > li:nth-child(5) > a')
@@ -50,7 +56,6 @@ const editCastToOk = async(accountKey, data, panelRef, logId, page) => {
       return;
 
     }
-
     //  登録されている情報の消去
     await page.waitForSelector('input[type="text"]');
     await page.evaluate(() => {
@@ -97,7 +102,7 @@ const editCastToOk = async(accountKey, data, panelRef, logId, page) => {
           for (let i = 0; i < panelLength; i++) {
             const fileInputName = `image${i+1}`;
             const file_input = await page.$(`input[name=${fileInputName}]`); // fileの選択
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             await file_input.uploadFile(file_path);
           }
           if (panelLength < 5) {

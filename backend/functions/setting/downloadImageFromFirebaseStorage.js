@@ -7,18 +7,26 @@ const bucket = admin.storage().bucket();
 const tempDir = os.tmpdir();    // ローカルの'C:\Users\<username>\AppData\Local\Temp'を返す
 const tempFolderPath = path.join(tempDir, 'firebase_temp_folder');
 
-const downloadImageFromFirebaseStorage = async(accountKey, storageFilePath, data) => {
+const downloadImageFromFirebaseStorage = async(storageFilePath) => {
   try {
       // 一時的なディレクトリにファイルをダウンロード
       await fs.mkdir(tempFolderPath, { recursive: true });  // Local\Tempに'firebase_temp_folderが無かったら作成する'
-      const files = await bucket.getFiles({ prefix: storageFilePath });
-      for(const fileArray of files) {
-        for(const file of fileArray) {
-            const sanitizedFileName = file.metadata.name.replace(new RegExp(`^users\\/${accountKey}\\/add_girl\\/${data.castName}\\/.*?\\/`), ''); // 無効な文字をアンダースコアに置換　RegExpで正規表現の文字列として構築される。
-            const localFilePath = path.join(tempFolderPath, sanitizedFileName);
-            await file.download({ destination: localFilePath });
+      const [fileArray] = await bucket.getFiles({ prefix: storageFilePath });
 
-        }
+      if(!fileArray.length) {
+        console.warn(`No files found for prefix: ${storageFilePath}`);
+        return;
+      
+      }
+
+      for(const file of fileArray) {
+        const storagePath = file.metadata.name;
+        const normalizedPath = storagePath.replace(/\\/g, '/');
+        let sanitizedFileName = path.basename(normalizedPath);
+        const localFilePath = path.join(tempFolderPath, sanitizedFileName);
+        console.log(`Downloading: ${storagePath} -> ${localFilePath}`);
+        await file.download({ destination: localFilePath });
+
       }
   } catch (error) {
       console.error('error:', error);

@@ -28,27 +28,30 @@ const editCastDataPrograms = async(db, accountKey, castName) => {
     latestKey = childSnapshot.key;
   });
 
-  const browser = await puppeteer.launch({ headless: false });
-  // const browser = await puppeteer.launch({ headless: "new" });
+  // const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
 
   page.on('dialog', async(dialog) => {
     await dialog.accept();
   });
 
-  await downloadImageFromFirebaseStorage(accountKey, storageFilePath, castData);
+  await downloadImageFromFirebaseStorage(storageFilePath);
 
   const editFunctions = [
-    // editCastToOhp,
-    // editCastToCh,
-    // editCastToEc,
+    editCastToOhp,
+    editCastToCh,
+    editCastToEc,
     editCastToPl,
-    // editCastToFj,
-    // editCastToKj,
-    // editCastToKf,
-    // editCastToOk,
-    // editCastToOg,
-    // editCastToYg
+    editCastToFj,
+    editCastToKj,
+    editCastToKf,
+    editCastToOk,
+    editCastToOg,
+    editCastToYg,
   ];
 
   try {

@@ -7,7 +7,10 @@ const writeEcAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type( '#form_email', id);
     await page.type('#form_password', pass);
-    await page.click('#form_submit');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'load' }),
+      page.click('#form_submit')
+    ]);
     const errorMessage = await page.$('body > div.main > div > div.row > div.col-md-3.login_form > form > div.error');
 
     if (errorMessage) {

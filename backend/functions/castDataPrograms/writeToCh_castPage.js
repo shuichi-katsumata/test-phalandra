@@ -4,7 +4,10 @@ const getLoginInfo = require('../setting/externalSiteInfo');
 const writeToCh_castPage = async(accountKey, castName, diaryAddress) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ch');
   // const browser = await puppeteer.launch({ headless: false });
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
   
   try {

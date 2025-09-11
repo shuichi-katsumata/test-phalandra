@@ -13,7 +13,8 @@ const puppeteer = require('puppeteer');
 const update_Authentications = async(accountKey, siteName) => {
   // const browser = await puppeteer.launch({ headless: false });
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
 

@@ -2,6 +2,8 @@ const getLoginInfo = require('../../setting/externalSiteInfo');
 
 const exportCastScheduleToKj = async(db, accountKey, logIdAndCastName, dateList, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'kj');
+  const globalLogId = Object.keys(logIdAndCastName)[0];
+  const globalContentLogs = db.ref(`users/${accountKey}/logs/schedule_log/${globalLogId}/content_logs`);
 
   try {
     //  ログイン処理
@@ -80,8 +82,8 @@ const exportCastScheduleToKj = async(db, accountKey, logIdAndCastName, dateList,
 
               } else {
                 startTime = schedule.startTime + ':00';
+              
               }
-
             }
             if (schedule.endTime && schedule.endTime !== 0 ) {
               endTime = schedule.endTime + ':00';
@@ -98,7 +100,6 @@ const exportCastScheduleToKj = async(db, accountKey, logIdAndCastName, dateList,
           await startTimeElement.evaluate(el => el.scrollIntoView());
           
           if (status === 'working' && startTime !== '' && endTime !== '') {
-            console.log(dateStr + ' ' + startTime);
             await startTimeElement.select(dateStr + ' ' + startTime);
 
             if (endTime === '24:00:00') {
@@ -136,6 +137,9 @@ const exportCastScheduleToKj = async(db, accountKey, logIdAndCastName, dateList,
     }
   } catch (error) {
     console.error(error.message);
+    await globalContentLogs.push({
+      kj: '口コミ風俗情報局：エラー！'
+    });
     
   }
 }

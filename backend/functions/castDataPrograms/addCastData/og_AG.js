@@ -4,6 +4,7 @@ const article_extraction = require('../../setting/article_extraction');
 const setTimeout = require('node:timers/promises').setTimeout;
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const writeToOg_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
@@ -25,11 +26,14 @@ const writeToOg_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     await page.waitForSelector('input[name="castEntryDate"]');
 
     //  入店日設定
-    await page.focus('input[name="castEntryDate"]');
-    await page.keyboard.down('Control');
-    await page.keyboard.press('KeyA');
-    await page.keyboard.up('Control');
-    await page.type('input[name="castEntryDate"]', data.entryDate);
+    if (data.entryDate) {
+      await page.focus('input[name="castEntryDate"]');
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyA');
+      await page.keyboard.up('Control');
+      await page.type('input[name="castEntryDate"]', data.entryDate);
+      
+    }
 
     await page.type('input[name="castAccount"]', conversion_hiraAndKanaToRomaji(data.castName));
     await page.type('input[name="castName"]', data.castName);
@@ -48,15 +52,17 @@ const writeToOg_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     await page.type('input[name="castComment3"]', data.catchCopy);
     await page.type('textarea[name="castComment1"]', article_extraction(data.shopComment));
     await page.type('textarea[name="castComment2"]', article_extraction(data.girlComment));
-    
+
     if (data.situation !== 'public') {
       await page.click('body > section > section > form > div > table > tbody > tr:nth-child(28) > td > label:nth-child(2) > input[type=radio]');
     
     }
     
-    await page.click('button[type="submit"]');
-    await page.waitForSelector('body > section > section > ul > li:nth-child(2) > a');
-    
+    const submitBtn = await page.$('button[type="submit"]');
+    await submitBtn.evaluate(el => el.scrollIntoView());
+    await submitBtn.click();
+    await setTimeout(3000);
+
     //  パネル登録 
     await new Promise((resolve, reject)=> {
       panelRef.once('value', async(snapshot) => {
@@ -81,10 +87,10 @@ const writeToOg_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
           
           await page.waitForSelector('#f > div:nth-child(2) > div:nth-child(2) > input[type="file"]');
           const panelLength = Object.keys(panelData).length;
-          
-          for (let i=0; i<panelLength; i++) {
+
+          for (let i = 0; i < panelLength; i++) {
             const fileInputElement = '#f > div:nth-child(2) > div:nth-child(2) > input[type="file"]';
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             
             if (i === 0) {
               const thumbInputElement = '#thumb';
@@ -113,14 +119,14 @@ const writeToOg_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
         resolve();
       });
     });
-
+    
     await setTimeout(3000);
-
     await content_logs.push({
       og: '雄琴ガイド：登録完了'
     
     });
   } catch (error) {
+    console.error(error);
     await content_logs.push({
       og: '雄琴ガイド：エラー！'
     

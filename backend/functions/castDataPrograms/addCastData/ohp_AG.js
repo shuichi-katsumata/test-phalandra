@@ -1,6 +1,7 @@
 const { tempFolderPath } = require('../../setting/downloadImageFromFirebaseStorage');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const writeToOhp_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
@@ -26,7 +27,10 @@ const writeToOhp_addGirl = async(accountKey, data, panelRef, latestKey, page) =>
 
     await page.type('input[name="Cast[name]"]', data.castName);
 
-    await page.type('input[class="form_day datepicker hasDatepicker"]', data.entryDate);
+    if (data.entryDate) {
+      await page.type('input[class="form_day datepicker hasDatepicker"]', data.entryDate);
+      
+    }
 
     if (data.flags) {
       for (let i = 0; i < data.flags.length; i++) {
@@ -87,7 +91,7 @@ const writeToOhp_addGirl = async(accountKey, data, panelRef, latestKey, page) =>
           for (let i = 0; i < panelLength; i++) {
             const fileInputName = `cast_image_file_${i+1}`;
             const file_input = await page.$(`input[name="${fileInputName}"]`); // fileの選択
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             await file_input.uploadFile(file_path);
 
           }

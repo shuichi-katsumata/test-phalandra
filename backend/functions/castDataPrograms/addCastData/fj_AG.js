@@ -4,12 +4,12 @@ const setTimeout = require('node:timers/promises').setTimeout;
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
 const checkAndResizeImage = require('../../setting/resizeImagesProgram');
+const path = require('path');
 
 const writeToFj_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
   const content_logs = db.ref(`users/${accountKey}/logs/girls_log/${latestKey}/content_logs`);
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'fj');
-  const [year, month, day] = data.entryDate.split('-');
  
   try {
 
@@ -47,6 +47,7 @@ const writeToFj_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     }
     
     if (data.entryDate !== '') {
+      const [year, month, day] = data.entryDate.split('-');
       await page.type('#form_visiting_year', year);
       await page.type('#form_visiting_month', month);
       await page.type('#form_visiting_date', day);
@@ -90,7 +91,7 @@ const writeToFj_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
               inputStyle.style.display = 'block';
             }, i);
             const file_input = await page.$(`input[name=file_girl_photo${i+1}]`);
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             //  ファイルサイズをチェックして必要ならリサイズ
             const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);
             //  アップロード処理
@@ -104,12 +105,14 @@ const writeToFj_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
     
     await page.type('#form_girl_pr', article_extraction(data.shopComment));
     await page.click('#girls_add > form > div.button_area > input[type=submit]');
-    await page.waitForSelector('#wrapper > div > div.leftColumn > nav > div:nth-child(8) > div > ul > li:nth-child(3) > a');
-    await page.click('#wrapper > div > div.leftColumn > nav > div:nth-child(8) > div > ul > li:nth-child(3) > a');
+    await page.waitForSelector('#wrapper > div > div.leftColumn > nav > div:nth-child(8) > div > ul > li.hover > a');
 
     // 非表示の場合の処理
     if (data.situation !== 'public') {
-      await page.waitForSelector('.chk_field');
+      await Promise.all([
+        page.waitForNavigation({ waitUntil: 'load' }),
+        page.click('#wrapper > div > div.leftColumn > nav > div:nth-child(8) > div > ul > li:nth-child(3) > a')
+      ]);
       await page.evaluate((castName)=> {
         const listItems = document.querySelectorAll('li.ui-state-default'); 
         listItems.forEach(item => {

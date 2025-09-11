@@ -1,5 +1,5 @@
-// ドラッグ＆ドロップ関数の定義（どこにも使ってないよ）
-async function dragAndDrop(page, sourceSelector, destinationSelector) {
+// ドラッグ＆ドロップ関数の定義（現在どこにも使ってない）
+const dragAndDrop = async(page, sourceSelector, destinationSelector) => {
     const sourceElement = await page.$(sourceSelector);
     const destinationElement = await page.$(destinationSelector);
     const sourceBox = await sourceElement.boundingBox();

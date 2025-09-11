@@ -1,5 +1,7 @@
 const { db } = require('../../utils/firebaseUtils');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
 const puppeteer = require('puppeteer');
 const getLoginInfo = require('../setting/externalSiteInfo');
 const importCastSchedulesToFirebase = require('./importCastSchedulesToFirebase');
@@ -7,9 +9,16 @@ const importCastSchedulesToFirebase = require('./importCastSchedulesToFirebase')
 const getCastSchedule = async(accountKey, selectedCast) => {
 
   // const browser = await puppeteer.launch({ headless: false });
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ohp');
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  const jpTime = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
+
   
   try {
     //  ログイン
@@ -33,7 +42,7 @@ const getCastSchedule = async(accountKey, selectedCast) => {
       let logId = new Date().getTime();
       db.ref(`users/${accountKey}/logs/schedule_log/${logId}`).set({
         content: `キャストスケジュール取り込み：${selectedCast[index]}`,
-        registration_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        registration_date: jpTime,
 
       });
       

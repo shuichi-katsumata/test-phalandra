@@ -44,6 +44,7 @@ const editCastToEc = async(accountKey, data, panelRef, logId, page) => {
       if (!castSearch) {
         //  検索に名前がなかったら、ログアウトして追加処理する
         await page.click('#hdr_bt > ul > li.statebtn > a');
+        await setTimeout(3000);
         await writeToEc_addGirl(accountKey, data, panelRef, logId, page);
         return;
       }
@@ -74,7 +75,7 @@ const editCastToEc = async(accountKey, data, panelRef, logId, page) => {
               await page.click(`a.boxer.modal-open[data-target="con${i + 1}"]`);
               await setTimeout(3000);
               const file_input = await page.$(`#con${i + 1} input[name=upfile]`);
-              const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+              const file_path = path.join(tempFolderPath, `${panelData[i+1]}`);
               //  ファイルサイズをチェックして必要ならリサイズ
               const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);
               //  アップロード処理

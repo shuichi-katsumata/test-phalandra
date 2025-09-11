@@ -8,7 +8,10 @@ const writeChAuthentication = async(accountKey, browser, page) => {
     await page.type('input[style="font-family:tahoma;font-size: 20px;"]', id); // id,password共に、同じnameの物がdisplay:noneで隠されていてそっちに反応してしまうので、styleで指定
     await page.keyboard.press('Tab');
     await page.keyboard.type(pass);
-    await page.click('body > div > form.oldLogin > table > tbody > tr:nth-child(2) > td > button');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil:'load', timeout: 60000 }),
+      page.click('body > div > form.oldLogin > table > tbody > tr:nth-child(2) > td > button'),
+    ]);
     const errorMessage = await page.$('body > div > div.section.error > font > ul > li');
 
     if (errorMessage) {

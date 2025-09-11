@@ -7,7 +7,10 @@ const writeOkAuthentication = async(accountKey, browser, page) => {
     await page.goto(loginUrl);
     await page.type('input[name="id"]', id);
     await page.type('input[name="password"]', pass);
-    await page.click('input[name="login_req"]');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'load' }),
+      page.click('input[name="login_req"]')
+    ]);
     const errorMessage = await page.$('#container > div > div > div.container > div > form > span');
 
     if (errorMessage) {

@@ -10,6 +10,8 @@ const exportCastScheduleToOk = async(db, accountKey, logIdAndCastName, dateList,
     await page.type('input[name="id"]', id);
     await page.type('input[name="password"]', pass);
     await page.click('input[name="login_req"]');
+    await setTimeout(2000);
+    
     await page.click('#container > div.menu > ul > li:nth-child(4) > a');
     await setTimeout(2000);
     
@@ -32,7 +34,6 @@ const exportCastScheduleToOk = async(db, accountKey, logIdAndCastName, dateList,
       for (const [id, castName] of Object.entries(logIdAndCastName)) {
         let castFound = false;
         for (const item of castItems) {
-          
           //  女の子検索
           const nameElement = await item.$('td:first-child');
           

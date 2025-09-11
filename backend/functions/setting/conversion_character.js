@@ -1,12 +1,12 @@
 // ひらがな→カタカナ変換
-function conversion_hiraToKana(str) {
+const conversion_hiraToKana = (str) => {
     return str.replace(/[\u3041-\u3096]/g, function(match) {
         const chr = match.charCodeAt(0) + 0x60;
         return String.fromCharCode(chr);
     });
 }
 // ひらがな→半角カタカナ変換
-function conversion_hiraToHankakuKana(str) {
+const conversion_hiraToHankakuKana = (str) => {
     const kanaMap = {
       'あ': 'ｱ', 'い': 'ｲ', 'う': 'ｳ', 'え': 'ｴ', 'お': 'ｵ',
       'か': 'ｶ', 'き': 'ｷ', 'く': 'ｸ', 'け': 'ｹ', 'こ': 'ｺ',
@@ -59,14 +59,14 @@ function conversion_hiraToHankakuKana(str) {
     return hankakuKatakana;
 }
 // カタカナ→ひらがな変換
-function conversion_kanaToHira(str) {
+const conversion_kanaToHira = (str) => {
     return str.replace(/[\u30a1-\u30f6]/g, function(match) {
         const chr = match.charCodeAt(0) - 0x60;
         return String.fromCharCode(chr);
     })
 }
 // ひらがな＆カタカナ→ローマ字変換
-function conversion_hiraAndKanaToRomaji(str) {
+const conversion_hiraAndKanaToRomaji = (str) => {
   const kanaMap = {
     // ひらがな
     'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o',

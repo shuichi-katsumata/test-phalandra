@@ -88,7 +88,6 @@ const deleteCastToOhp = async(accountKey, data, logId, page) => {
     });
 
   } catch (error) {
-
     console.error(error.message);
     await content_logs.push({
       ohp: 'オフィシャル：エラー！'

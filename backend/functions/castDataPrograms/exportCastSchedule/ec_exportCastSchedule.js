@@ -3,7 +3,9 @@ const setTimeout = require('node:timers/promises').setTimeout;
 
 const exportCastScheduleToEc = async(db, accountKey, logIdAndCastName, dateList, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'ec');
-  
+  const globalLogId = Object.keys(logIdAndCastName)[0];
+  const globalContentLogs = db.ref(`users/${accountKey}/logs/schedule_log/${globalLogId}/content_logs`);
+
   try {
 
     //  ログイン処理
@@ -117,6 +119,9 @@ const exportCastScheduleToEc = async(db, accountKey, logIdAndCastName, dateList,
 
   } catch (error) {
     console.error(error.message);
+    await globalContentLogs.push({
+      ec: '駅ちか：エラー！'
+    });
 
   }
 }

@@ -2,6 +2,7 @@ const { tempFolderPath } = require('../../setting/downloadImageFromFirebaseStora
 const writeToOhp_addGirl = require('../addCastData/ohp_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const editCastToOhp = async(accountKey, data, panelRef, logId, page) => {
 
@@ -104,7 +105,10 @@ const editCastToOhp = async(accountKey, data, panelRef, logId, page) => {
 
     await page.type('input[name="Cast[name]"]', data.castName);
 
-    await page.type('input[class="form_day datepicker hasDatepicker"]', data.entryDate);
+    if (data.entryDate) {
+      await page.type('input[class="form_day datepicker hasDatepicker"]', data.entryDate);
+
+    }
 
     if (data.flags[0].label !== '') {
       for (let i = 0; i < data.flags.length; i++) {
@@ -169,8 +173,9 @@ const editCastToOhp = async(accountKey, data, panelRef, logId, page) => {
           for (let i = 0; i < panelLength; i++) {
             const fileInputName = `cast_image_file_${i + 1}`;
             const file_input = await page.$(`input[name="${fileInputName}"]`); // fileの選択
-            const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             await file_input.uploadFile(file_path);
+
           }
           await page.evaluate((panelLength) => {
             for (let i = panelLength; i < 10; i++) {
@@ -178,6 +183,7 @@ const editCastToOhp = async(accountKey, data, panelRef, logId, page) => {
               if (imgDeleteBtns) {
                 imgDeleteBtns.forEach((btn) => {
                   btn.click();
+            
                 });
               }
             }
@@ -188,6 +194,7 @@ const editCastToOhp = async(accountKey, data, panelRef, logId, page) => {
             if (imgDeleteBtns) {
               imgDeleteBtns.forEach((btn) => {
                 btn.click();
+
               });
             }
           });

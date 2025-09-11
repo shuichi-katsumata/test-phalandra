@@ -5,6 +5,7 @@ const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
 const checkAndResizeImage = require('../../setting/resizeImagesProgram');
 const fs = require('fs');
+const path = require('path');
 
 const writeToYg_addGirl = async(accountKey, data, panelRef, latestKey, page) => {
 
@@ -96,7 +97,7 @@ const writeToYg_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
           for (let i = 0; i < panelLength; i++) {
             const fileInputName = `images[${i}].file`;
             const file_input = await frame.$(`input[name="${fileInputName}"]`); // fileの選択
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             
             //  ファイルサイズをチェックして必要ならリサイズ
             const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 488);
@@ -111,8 +112,8 @@ const writeToYg_addGirl = async(accountKey, data, panelRef, latestKey, page) => 
           await setTimeout(5000);
          
           const file_input = await frame.$('input[name="file"]'); // fileの選択
-          const originalPath = `${tempFolderPath}\\${panelData[1]}`;
-          const resizedPath = `${tempFolderPath}\\resized${panelData[1]}`;
+          const originalPath = path.join(tempFolderPath, panelData[1]);
+          const resizedPath = path.join(tempFolderPath, 'resized' + panelData[1]);
           
           //  先程リサイズした画像データがあればそちらを使う
           let uploadFilePath = fs.existsSync(resizedPath) ? resizedPath : originalPath; //  fs.existsSyncでファイルやディレクトリが存在するか調べられる

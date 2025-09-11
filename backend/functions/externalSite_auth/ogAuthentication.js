@@ -1,4 +1,5 @@
 const getLoginInfo = require('../setting/externalSiteInfo'); 
+const setTimeout = require('node:timers/promises').setTimeout;
 
 const writeOgAuthentication = async(accountKey, browser, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'og');
@@ -8,6 +9,7 @@ const writeOgAuthentication = async(accountKey, browser, page) => {
     await page.type('input[name="operatorId"]', id);
     await page.type('input[name="operatorPass"]', pass);
     await page.click('button[type="submit"]');
+    await setTimeout(2000);
     const errorMessage = await page.$('body > section > div > div');
 
     if (errorMessage) {

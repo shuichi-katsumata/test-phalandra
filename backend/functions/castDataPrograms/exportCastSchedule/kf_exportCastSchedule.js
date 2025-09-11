@@ -1,9 +1,9 @@
-const { timeout } = require('puppeteer-core');
 const getLoginInfo = require('../../setting/externalSiteInfo');
-const { default: puppeteer } = require('puppeteer');
 
 const exportCastScheduleToKf = async(db, accountKey, logIdAndCastName, dateList, page) => {
   const { id, pass, loginUrl } = await getLoginInfo(accountKey, 'kf');
+  const globalLogId = Object.keys(logIdAndCastName)[0];
+  const globalContentLogs = db.ref(`users/${accountKey}/logs/schedule_log/${globalLogId}/content_logs`);
 
   try {
     //  ログイン処理
@@ -164,11 +164,18 @@ const exportCastScheduleToKf = async(db, accountKey, logIdAndCastName, dateList,
         }
 
         const pagerBtn = await page.$('li.pagination__btn svg path[d*="41-6"]');
-        if (pagerBtn) { //  Promise.allだと不安定になる
-          await pagerBtn.click();
-          await page.waitForSelector('#scheduleAdmin__items__id'); 
+        if (pagerBtn) {
+          // 親 li を再取得
+          const pagerBtnParent = await pagerBtn.evaluateHandle(el => el.closest('li.pagination__btn'));
+          if (pagerBtnParent) {
+            await pagerBtnParent.evaluate(el => el.scrollIntoView({ block: 'center' }));
+            // click 後に DOM の再取得
+            await pagerBtnParent.evaluate(el => el.click());
+            // 再取得した selector で待つ
+            await page.waitForSelector('#scheduleAdmin__items__id');
+            
+          }
         }
-
       } catch(error) {
         console.error(error.message);
         await content_logs.push({
@@ -179,6 +186,9 @@ const exportCastScheduleToKf = async(db, accountKey, logIdAndCastName, dateList,
     }
   } catch (error) {
     console.error(error.message);
+    await globalContentLogs.push({
+      kf: '京風：エラー！'
+    });
     
   }
 }

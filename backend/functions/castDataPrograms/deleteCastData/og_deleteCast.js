@@ -56,7 +56,7 @@ const deleteCastToOg = async(accountKey, data, logId, page) => {
     });
     
   } catch (error) {
-
+    console.error(error.message);
     await content_logs.push({
       og: '雄琴ガイド：エラー！'
     });

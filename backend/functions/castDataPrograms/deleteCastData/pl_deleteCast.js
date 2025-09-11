@@ -57,7 +57,7 @@ const deleteCastToPl = async(accountKey, data, logId, page) => {
     });
 
   } catch (error) {
-    
+    console.error(error.message);
     await content_logs.push({
       pl: 'ぴゅあらば：エラー！'
     });

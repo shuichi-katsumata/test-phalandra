@@ -5,6 +5,7 @@ const writeToCh_addGirl = require('../addCastData/ch_AG');
 const setTimeout = require('node:timers/promises').setTimeout;
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
+const path = require('path');
 
 const editCastToCh = async(accountKey, data, panelRef, logId, page) => {
 
@@ -18,14 +19,14 @@ const editCastToCh = async(accountKey, data, panelRef, logId, page) => {
     await page.keyboard.press('Tab');
     await page.keyboard.type(pass);
     await Promise.all([
-      page.waitForNavigation({waitUntil:'load'}),
+      page.waitForNavigation({ waitUntil:'load', timeout: 60000 }),
       page.click('body > div > form.oldLogin > table > tbody > tr:nth-child(2) > td > button'),
     ]);
 
     const castListPageLink2 = await page.$x("//a[normalize-space(text())='キャスト情報']");
     //  女の子情報タブをクリック
     await Promise.all([
-      page.waitForNavigation({ waitUntil: 'load' }),
+      page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
       castListPageLink2[0].click(),
     
     ]);
@@ -74,7 +75,7 @@ const editCastToCh = async(accountKey, data, panelRef, logId, page) => {
       }
     }
 
-    await page.waitForNavigation({waitUntil: 'load'});
+    await page.waitForNavigation({ waitUntil: 'load', timeout: 60000 });
 
     //  登録していた情報の消去
     await page.evaluate(() => {
@@ -95,7 +96,7 @@ const editCastToCh = async(accountKey, data, panelRef, logId, page) => {
         btn.click();
       });
     });
-    await page.waitForNavigation({waitUntil: 'load'});
+    await page.waitForNavigation({ waitUntil: 'load', timeout: 60000 });
 
     //  プロフィール再登録
     if (data.situation !== 'public') {
@@ -136,9 +137,10 @@ const editCastToCh = async(accountKey, data, panelRef, logId, page) => {
           for (let i = 0; i < panelLength; i++) {
             const fileInputName = `girls_photo${i}`;
             const file_input = await page.$(`input[name="${fileInputName}"]`); // ページ上で指定された名前属性を持つファイル入力要素を取得
-            const file_path = `${tempFolderPath}\\${panelData[i + 1]}`;
+            const file_path = path.join(tempFolderPath, `${panelData[i + 1]}`);
             await file_input.uploadFile(file_path); // uploadFileを使うのでclickはいらない
-            await page.waitForNavigation(); // 各画像のアップロードに時間がかかるので、完了するまで待って繰り返す
+            await page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }); // 各画像のアップロードに時間がかかるので、完了するまで待って繰り返す
+
           }
         }
         resolve();
@@ -188,7 +190,7 @@ const editCastToCh = async(accountKey, data, panelRef, logId, page) => {
     const submitBtn = await page.$('input[name="update"]');
     await submitBtn.evaluate(el => el.scrollIntoView());
     await Promise.all([
-      page.waitForNavigation({waitUntil: 'load'}),
+      page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }),
       submitBtn.click(),
     
     ]);

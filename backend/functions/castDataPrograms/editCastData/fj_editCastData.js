@@ -5,6 +5,7 @@ const writeToFj_addGirl = require('../addCastData/fj_AG');
 const getLoginInfo = require('../../setting/externalSiteInfo');
 const { db } = require('../../../utils/firebaseUtils');
 const checkAndResizeImage = require('../../setting/resizeImagesProgram');
+const path = require('path');
 
 const editCastToFj = async(accountKey, data, panelRef, logId, page) => {
   
@@ -103,8 +104,8 @@ const editCastToFj = async(accountKey, data, panelRef, logId, page) => {
 
     // 在籍Q＆Aは、サイト自体が#form_prof_q${i+1}の順番がぐちゃぐちゃなので注意
     for (let i = 0; i < 10; i++) {
-      await page.type(`#form_prof_q${i+1}`, data[`question${i + 1}`]);
-      await page.type(`#form_prof_a${i+1}`, data[`answer${i + 1}`]);
+      await page.type(`#form_prof_q${i + 1}`, data[`question${i + 1}`]);
+      await page.type(`#form_prof_a${i + 1}`, data[`answer${i + 1}`]);
 
     }
 
@@ -155,7 +156,7 @@ const editCastToFj = async(accountKey, data, panelRef, logId, page) => {
               inputStyle.style.display = 'block';
             }, i);
             const file_input = await page.$(`input[name=file_girl_photo${i+1}]`);
-            const file_path = `${tempFolderPath}\\${panelData[i+1]}`;
+            const file_path = path.join(tempFolderPath, panelData[i + 1]);
             //  ファイルサイズをチェックして必要ならリサイズ
             const uploadFilePath = await checkAndResizeImage(file_path, tempFolderPath, panelData, i, 1000);
             //  アップロード処理
@@ -163,7 +164,7 @@ const editCastToFj = async(accountKey, data, panelRef, logId, page) => {
           }
           for (let i = panelLength; i < 10; i++) {
             await page.evaluate((index) => {
-              const imgDeleteBtns = document.querySelectorAll(`label[for="form_del_girl_photo${index+1}"]`);
+              const imgDeleteBtns = document.querySelectorAll(`label[for="form_del_girl_photo${index + 1}"]`);
               if (imgDeleteBtns) {
                 imgDeleteBtns.forEach((btn) => {
                   btn.click();
